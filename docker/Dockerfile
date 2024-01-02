@@ -13,6 +13,19 @@ RUN echo "deb [trusted=yes] https://apt.postgresml.org $(lsb_release -cs) main" 
 RUN echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list
 RUN curl https://www.postgresql.org/media/keys/ACCC4CF8.asc | gpg --dearmor | tee /etc/apt/trusted.gpg.d/apt.postgresql.org.gpg >/dev/null
 
+# Install build-essential tools and required packages
+RUN apt-get update && \
+    apt-get install -y build-essential curl wget git jq cmake gnupg postgresql-common apt-transport-https lsb-release protobuf-c-compiler libprotobuf-c-dev postgresql-server-dev-15 libkrb5-dev && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Clone timescaledb source code from GitHub
+RUN git clone https://github.com/timescale/timescaledb && \
+    cd timescaledb && \
+    git checkout 2.12.2 && \
+    ./bootstrap && \
+    cd build && make && \
+    make install
+
 ENV TZ=UTC
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt update -y && apt install git postgresml-15 postgresml-dashboard -y
