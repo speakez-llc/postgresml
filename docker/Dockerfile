@@ -28,7 +28,7 @@ RUN git clone https://github.com/timescale/timescaledb && \
 
 ENV TZ=UTC
 ENV DEBIAN_FRONTEND=noninteractive
-RUN apt update -y && apt install git postgresml-15 postgresml-dashboard -y
+RUN apt update -y && apt install git postgresml-15 postgresql-contrib-15 postgresml-dashboard -y
 RUN git clone --branch v0.5.0 https://github.com/pgvector/pgvector && \
 cd pgvector && \
 echo "trusted = true" >> vector.control && \
@@ -40,5 +40,8 @@ COPY dashboard.sh /app/dashboard.sh
 
 COPY --chown=postgres:postgres local_dev.conf /etc/postgresql/15/main/conf.d/01-local_dev.conf
 COPY --chown=postgres:postgres pg_hba.conf /etc/postgresql/15/main/pg_hba.conf
+
+RUN echo "include_dir = 'conf.d'" >> /etc/postgresql/15/main/postgresql.conf
+
 
 ENTRYPOINT ["bash", "/app/entrypoint.sh"]
